@@ -9,7 +9,6 @@ export default function AllUsers() {
   const [users, setUsers] = useState([])
   const [filters, setFilters] = useState({
     search: '',
-    status: 'all',
     role: 'all',
     dateRange: 'all'
   })
@@ -26,23 +25,21 @@ export default function AllUsers() {
     setLoading(true)
     
     try {
+      console.log('Fetching users from user_profiles table...')
+      
+      // Updated query to join with businesses table (left join to include all users)
       let query = supabase
-        .from('users') // Assuming you have a users table
+        .from('user_profiles')
         .select(`
           *,
-          user_profiles(business_name, business_type),
-          applications(count)
+          businesses(business_name, business_type)
         `)
-        .order(sortConfig.field, { ascending: sortConfig.direction === 'asc' })
+        .order(sortConfig.field || 'created_at', { ascending: sortConfig.direction === 'asc' })
         .limit(100)
 
       // Apply filters
       if (filters.search) {
         query = query.or(`email.ilike.%${filters.search}%,full_name.ilike.%${filters.search}%`)
-      }
-      
-      if (filters.status !== 'all') {
-        query = query.eq('status', filters.status)
       }
       
       if (filters.role !== 'all') {
@@ -51,54 +48,20 @@ export default function AllUsers() {
 
       const { data, error } = await query
 
+      console.log('Query result:', { data, error })
+      console.log('Number of users found:', data?.length || 0)
+
       if (error) throw error
 
       setUsers(data || [])
     } catch (error) {
       console.error('Error fetching users:', error)
-      // If users table doesn't exist, show mock data
-      setUsers(mockUsers)
+      console.error('Error details:', error.message, error.code, error.details)
+      setUsers([])
     } finally {
       setLoading(false)
     }
   }
-
-  // Mock data for demonstration
-  const mockUsers = [
-    {
-      id: 1,
-      email: 'john.silva@email.com',
-      full_name: 'John Silva',
-      status: 'active',
-      role: 'business_owner',
-      created_at: '2024-07-15T10:30:00Z',
-      last_login: '2024-08-14T15:20:00Z',
-      user_profiles: { business_name: 'Silva Enterprises', business_type: 'retail' },
-      applications: { count: 2 }
-    },
-    {
-      id: 2,
-      email: 'maria.perera@email.com',
-      full_name: 'Maria Perera',
-      status: 'pending',
-      role: 'business_owner',
-      created_at: '2024-07-20T09:15:00Z',
-      last_login: '2024-08-13T11:45:00Z',
-      user_profiles: { business_name: 'Perera Trading', business_type: 'wholesale' },
-      applications: { count: 1 }
-    },
-    {
-      id: 3,
-      email: 'admin@vyapara.lk',
-      full_name: 'Admin User',
-      status: 'active',
-      role: 'admin',
-      created_at: '2024-06-01T08:00:00Z',
-      last_login: '2024-08-15T08:30:00Z',
-      user_profiles: null,
-      applications: { count: 0 }
-    }
-  ]
 
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
@@ -122,16 +85,15 @@ export default function AllUsers() {
   }
 
   const handleExportCsv = () => {
-    const headers = ['ID', 'Name', 'Email', 'Status', 'Role', 'Business Name', 'Created At', 'Last Login']
+    const headers = ['ID', 'Name', 'Email', 'Role', 'Business Name', 'Business Type', 'Created At']
     const rows = filteredUsers.map(user => [
       user.id,
       user.full_name || '',
       user.email || '',
-      user.status || '',
       user.role || '',
-      user.user_profiles?.business_name || '',
-      user.created_at ? new Date(user.created_at).toLocaleDateString() : '',
-      user.last_login ? new Date(user.last_login).toLocaleDateString() : ''
+      user.businesses?.business_name || '',
+      user.businesses?.business_type || '',
+      user.created_at ? new Date(user.created_at).toLocaleDateString() : ''
     ])
     
     const csvContent = [headers, ...rows]
@@ -190,18 +152,6 @@ export default function AllUsers() {
                 style={{ paddingLeft: '40px', width: '100%', padding: '8px 12px', border: '1px solid #ddd', borderRadius: '4px' }}
               />
             </div>
-            
-            <select
-              value={filters.status}
-              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-              style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '4px' }}
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="pending">Pending</option>
-              <option value="suspended">Suspended</option>
-              <option value="inactive">Inactive</option>
-            </select>
 
             <select
               value={filters.role}
@@ -233,11 +183,6 @@ export default function AllUsers() {
                     )}
                   </th>
                   <th>Business</th>
-                  <th onClick={() => handleSort('status')} style={{ cursor: 'pointer' }}>
-                    Status {sortConfig.field === 'status' && (
-                      <i className={`fas fa-sort-${sortConfig.direction === 'asc' ? 'up' : 'down'}`} />
-                    )}
-                  </th>
                   <th onClick={() => handleSort('role')} style={{ cursor: 'pointer' }}>
                     Role {sortConfig.field === 'role' && (
                       <i className={`fas fa-sort-${sortConfig.direction === 'asc' ? 'up' : 'down'}`} />
@@ -248,7 +193,6 @@ export default function AllUsers() {
                       <i className={`fas fa-sort-${sortConfig.direction === 'asc' ? 'up' : 'down'}`} />
                     )}
                   </th>
-                  <th>Last Login</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -268,11 +212,11 @@ export default function AllUsers() {
                     </td>
                     <td>{user.email}</td>
                     <td>
-                      {user.user_profiles ? (
+                      {user.businesses ? (
                         <div>
-                          <div>{user.user_profiles.business_name}</div>
+                          <div>{user.businesses.business_name}</div>
                           <div style={{ fontSize: '12px', color: '#666', textTransform: 'capitalize' }}>
-                            {user.user_profiles.business_type}
+                            {user.businesses.business_type}
                           </div>
                         </div>
                       ) : (
@@ -280,17 +224,11 @@ export default function AllUsers() {
                       )}
                     </td>
                     <td>
-                      <span className={`status-badge ${user.status}`}>
-                        {user.status}
-                      </span>
-                    </td>
-                    <td>
                       <span style={{ textTransform: 'capitalize' }}>
                         {user.role?.replace('_', ' ')}
                       </span>
                     </td>
                     <td>{user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}</td>
-                    <td>{user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}</td>
                     <td>
                       <div className="action-buttons">
                         <button className="btn btn-ghost btn-sm" title="View Profile">

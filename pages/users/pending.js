@@ -21,10 +21,9 @@ export default function PendingUsers() {
     setLoading(true)
     try {
       let query = supabase
-        .from('users')
+        .from('user_profiles')
         .select(`
           *,
-          user_profiles(business_name, business_type, business_description),
           applications(id, status, submitted_at)
         `)
         .eq('status', 'pending')
@@ -35,61 +34,11 @@ export default function PendingUsers() {
       setPendingUsers(data || [])
     } catch (err) {
       console.error('Error fetching pending users:', err)
-      setPendingUsers(mockPendingUsers) // fallback demo data
+      setPendingUsers([])
     } finally {
       setLoading(false)
     }
   }
-
-  // ---- demo data fallback ----
-  const mockPendingUsers = [
-    {
-      id: 1,
-      email: 'newuser1@email.com',
-      full_name: 'Rajesh Fernando',
-      phone: '+94 77 123 4567',
-      status: 'pending',
-      created_at: '2024-08-14T10:30:00Z',
-      verification_notes: 'Awaiting email verification',
-      user_profiles: {
-        business_name: 'Fernando Electronics',
-        business_type: 'retail',
-        business_description: 'Electronics retail store in Colombo'
-      },
-      applications: [{ id: 'APP-2024-015', status: 'pending', submitted_at: '2024-08-14T11:00:00Z' }]
-    },
-    {
-      id: 2,
-      email: 'businessowner@example.com',
-      full_name: 'Priya Wickramasinghe',
-      phone: '+94 71 987 6543',
-      status: 'pending',
-      created_at: '2024-08-13T15:45:00Z',
-      verification_notes: 'Requires manual document review',
-      user_profiles: {
-        business_name: 'Wickrama Textiles',
-        business_type: 'manufacturing',
-        business_description: 'Traditional textile manufacturing'
-      },
-      applications: [{ id: 'APP-2024-014', status: 'under_review', submitted_at: '2024-08-13T16:00:00Z' }]
-    },
-    {
-      id: 3,
-      email: 'startup@tech.lk',
-      full_name: 'Kamal Jayasuriya',
-      phone: '+94 75 555 0123',
-      status: 'pending',
-      created_at: '2024-08-12T09:20:00Z',
-      verification_notes: 'Business registration pending',
-      user_profiles: {
-        business_name: 'TechStart Solutions',
-        business_type: 'technology',
-        business_description: 'Software development startup'
-      },
-      applications: [{ id: 'APP-2024-012', status: 'pending', submitted_at: '2024-08-12T10:15:00Z' }]
-    }
-  ]
-  // ---- end demo data ----
 
   const handleUserSelect = (userId, checked) => {
     const s = new Set(selectedUsers)
@@ -260,11 +209,11 @@ export default function PendingUsers() {
                     </div>
                   </div>
 
-                  {user.user_profiles && (
+                  {user.business_name && (
                     <div className="business-info">
-                      <h5><i className="fas fa-building" /> {user.user_profiles.business_name}</h5>
-                      <p className="business-type">{user.user_profiles.business_type}</p>
-                      <p className="business-desc">{user.user_profiles.business_description}</p>
+                      <h5><i className="fas fa-building" /> {user.business_name}</h5>
+                      <p className="business-type">{user.business_type}</p>
+                      <p className="business-desc">{user.business_description}</p>
                     </div>
                   )}
 

@@ -3789,6 +3789,7 @@ select {
 .metric-card.primary::before { background: #3b82f6; }
 .metric-card.success::before { background: #10b981; }
 .metric-card.warning::before { background: #f59e0b; }
+.metric-card.danger::before { background: #ef4444; }
 .metric-card.info::before { background: #8b5cf6; }
 
 .metric-icon {
@@ -3805,6 +3806,7 @@ select {
 .metric-card.primary .metric-icon { background: #3b82f6; }
 .metric-card.success .metric-icon { background: #10b981; }
 .metric-card.warning .metric-icon { background: #f59e0b; }
+.metric-card.danger .metric-icon { background: #ef4444; }
 .metric-card.info .metric-icon { background: #8b5cf6; }
 
 .metric-content {
@@ -4440,6 +4442,35 @@ select {
 .assignee {
     color: var(--gray-600);
     font-size: 0.875rem;
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--gray-600);
+    cursor: pointer;
+    padding: var(--spacing-2);
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.sidebar-toggle-btn:hover {
+    background: var(--gray-100);
+    color: var(--gray-900);
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-6);
+    border-bottom: 1px solid var(--gray-200);
 }
 
 /* Decision Modal Specific Styles */

@@ -1,133 +1,255 @@
 // pages/dashboard.js
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
-
 import Layout from '../components/Layout'
-import StatsCard from '../components/StatsCard'
-import PendingTable from '../components/PendingTable'
-import VerificationPipeline from '../components/VerificationPipeline'
-import RecentActivity from '../components/RecentActivity'
+import { getApplicationStatistics } from '../lib/applicationService'
 
 export default function Dashboard() {
   const router = useRouter()
-  const [ready, setReady] = useState(false)
-  const [activityReloadKey, setActivityReloadKey] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [dateRange, setDateRange] = useState('30d')
+  const [reportData, setReportData] = useState({
+    applications: { total: 0, pending: 0, approved: 0, rejected: 0, inReview: 0 },
+    performance: { avgProcessingTime: 0, slaCompliance: 0, approvalRate: 0, rejectionRate: 0 },
+    businessTypes: [],
+    monthlyData: [],
+    trends: { weeklyGrowth: 0, monthlyGrowth: 0, conversionRate: 0 }
+  })
+  const [error, setError] = useState(null)
+
+  const fetchReportData = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { data, error: fetchError } = await getApplicationStatistics(dateRange)
+      if (fetchError) {
+        setError('Failed to fetch report data: ' + fetchError.message)
+        setReportData({
+          applications: { total: 0, pending: 0, approved: 0, rejected: 0, inReview: 0 },
+          performance: { avgProcessingTime: 0, slaCompliance: 0, approvalRate: 0, rejectionRate: 0 },
+          businessTypes: [],
+          monthlyData: [],
+          trends: { weeklyGrowth: 0, monthlyGrowth: 0, conversionRate: 0 }
+        })
+      } else if (data) {
+        setReportData(data)
+      } else {
+        setReportData({
+          applications: { total: 0, pending: 0, approved: 0, rejected: 0, inReview: 0 },
+          performance: { avgProcessingTime: 0, slaCompliance: 0, approvalRate: 0, rejectionRate: 0 },
+          businessTypes: [],
+          monthlyData: [],
+          trends: { weeklyGrowth: 0, monthlyGrowth: 0, conversionRate: 0 }
+        })
+      }
+    } catch (error) {
+      console.error('Unexpected error fetching report data:', error)
+      setError('An unexpected error occurred while loading report data.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const authed = typeof window !== 'undefined' && localStorage.getItem('auth') === 'true'
-    if (!authed) router.replace('/') // bounce to login if not authed
-    else setReady(true)
-  }, [router])
+    fetchReportData()
+  }, [dateRange])
 
-  if (!ready) {
+  const exportReport = async (format) => {
+    const timestamp = new Date().toISOString().slice(0, 10)
+    const filename = `vyapara_report_${dateRange}_${timestamp}`
+
+    if (format === 'csv') {
+      const csvData = [
+        ['Metric', 'Value'],
+        ['Total Applications', reportData.applications.total],
+        ['Pending Applications', reportData.applications.pending],
+        ['Approved Applications', reportData.applications.approved],
+        ['Rejected Applications', reportData.applications.rejected],
+        ['Applications in Review', reportData.applications.inReview],
+        ['Average Processing Time (days)', reportData.performance.avgProcessingTime],
+        ['SLA Compliance (%)', reportData.performance.slaCompliance],
+        ['Approval Rate (%)', reportData.performance.approvalRate],
+        ['Rejection Rate (%)', reportData.performance.rejectionRate],
+        ['Weekly Growth (%)', reportData.trends.weeklyGrowth],
+        ['Monthly Growth (%)', reportData.trends.monthlyGrowth],
+        ['Conversion Rate (%)', reportData.trends.conversionRate]
+      ]
+
+      const csvContent = csvData.map(row => 
+        row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')
+      ).join('\n')
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${filename}.csv`
+      link.click()
+      URL.revokeObjectURL(url)
+    }
+  }
+
+  const getDateRangeLabel = () => {
+    const labels = {
+      '7d': 'Last 7 Days',
+      '30d': 'Last 30 Days',
+      '90d': 'Last 90 Days',
+      '1y': 'Last Year'
+    }
+    return labels[dateRange] || 'Last 30 Days'
+  }
+
+  if (loading) {
     return (
-      <div className="loading-screen">
-        <div className="spinner" />
-      </div>
+      <Layout>
+        <div className="loading-screen">
+          <div className="spinner" />
+          <p>Loading dashboard data...</p>
+        </div>
+      </Layout>
     )
   }
 
- const statsData = [
-    { title: 'Pending Applications', value: '24', change: '+12%', trend: 'up', icon: 'fa-solid fa-clock',  color: 'orange', href: '/applications?status=pending' },
-    { title: 'Approved Today',       value: '18', change: '+8%',  trend: 'up', icon: 'fa-solid fa-circle-check', color: 'green',  href: '/applications?status=approved&dateRange=today' },
-    { title: 'In Review',            value: '31', change: '-5%',  trend: 'down',icon: 'fa-solid fa-eye',   color: 'blue',   href: '/applications?status=in-review' },
-    // If you already have /users/all, link to it. If not, you can make a stub page (see note below).
-    { title: 'Total Users',          value: '1,247', change: '+23%', trend: 'up', icon: 'fa-solid fa-users', color: 'purple', href: '/users/all' }
-  ]
-
-  const handleNewApplication = () => router.push('/applications/new')
-  const handleOpenPipeline = () => router.push('/applications')
-  const handleRefreshActivity = () => setActivityReloadKey(k => k + 1)
-
   return (
     <Layout>
-      <div className="dashboard-container">
-        <div className="dashboard-header">
+      <div className="applications-container">
+        <div className="applications-header">
           <div className="header-content">
             <h1>Dashboard</h1>
-            <p>Welcome back! Here's what's happening with your applications.</p>
+            <p>Real-time insights into your application processing</p>
           </div>
           <div className="header-actions">
-            <button className="btn btn-primary" onClick={handleNewApplication}>
-              <i className="fa-solid fa-plus"></i>
-              New Application
+            <select 
+              className="date-range-select"
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+            >
+              <option value="7d">Last 7 Days</option>
+              <option value="30d">Last 30 Days</option>
+              <option value="90d">Last 90 Days</option>
+              <option value="1y">Last Year</option>
+            </select>
+            
+            <button 
+              className="btn btn-ghost"
+              onClick={() => exportReport('csv')}
+              disabled={reportData.applications.total === 0}
+            >
+              <i className="fas fa-download" />
+              Export CSV
+            </button>
+            
+            <button 
+              className="btn btn-primary"
+              onClick={() => fetchReportData()}
+              disabled={loading}
+            >
+              <i className="fas fa-sync" />
+              Refresh Data
             </button>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="stats-grid">
-          {statsData.map((s, i) => <StatsCard key={i} {...s} />)}
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="dashboard-grid">
-          {/* Verification Pipeline */}
-          <div className="dashboard-card pipeline-card">
-            <div className="card-header">
-              <h3>Verification Pipeline</h3>
-              <button className="btn btn-ghost btn-sm" onClick={handleOpenPipeline}>
-                <i className="fa-solid fa-expand"></i>
-              </button>
-            </div>
-            <VerificationPipeline />
+        {error && (
+          <div className="error-banner" style={{marginBottom: '1rem'}}>
+            <i className="fas fa-exclamation-circle" /> {error}
+            <button 
+              className="btn btn-sm btn-ghost" 
+              onClick={() => fetchReportData()}
+              style={{marginLeft: '1rem'}}
+            >
+              Retry
+            </button>
           </div>
+        )}
 
-          {/* Pending Applications */}
-          <div className="dashboard-card">
-            <div className="card-header">
-              <h3>Pending Sign-ups</h3>
-              <Link href="/applications" className="btn btn-ghost btn-sm">
-                View All <i className="fa-solid fa-arrow-right"></i>
-              </Link>
-            </div>
-            <PendingTable />
-          </div>
-
-          {/* Recent Activity */}
-          <div className="dashboard-card activity-card">
-            <div className="card-header">
-              <h3>Recent Activity</h3>
-              <button className="btn btn-ghost btn-sm" onClick={handleRefreshActivity}>
-                <i className="fa-solid fa-rotate"></i>
-              </button>
-            </div>
-            {/* pass a changing key so the component can refetch or rerender */}
-            <RecentActivity key={activityReloadKey} />
-          </div>
-
-          {/* SLA Alerts */}
-          <div className="dashboard-card alerts-card">
-            <div className="card-header">
-              <h3>SLA Alerts</h3>
-              <span className="alert-badge">3</span>
-            </div>
-            <div className="alerts-list">
-              <div className="alert-item critical">
-                <div className="alert-icon">
-                  <i className="fa-solid fa-triangle-exclamation"></i>
+        <div className="reports-content">
+          {/* Combined Key Metrics & Application Status */}
+          <div className="metrics-section">
+            <h2>Key Metrics & Application Status - {getDateRangeLabel()}</h2>
+            <div className="metrics-grid">
+              <div className="metric-card primary">
+                <div className="metric-icon">
+                  <i className="fas fa-file-alt"></i>
                 </div>
-                <div className="alert-content">
-                  <h4>Critical Delay</h4>
-                  <p>APP-2024-001 pending for 72+ hours</p>
-                  <span className="alert-time">3 days ago</span>
+                <div className="metric-content">
+                  <div className="metric-value">{reportData.applications.total.toLocaleString()}</div>
+                  <div className="metric-label">Total Applications</div>
+                  <div className="metric-trend positive">
+                    <i className="fas fa-arrow-up"></i>
+                    +{reportData.trends.monthlyGrowth}% vs last period
+                  </div>
                 </div>
               </div>
-              <div className="alert-item warning">
-                <div className="alert-icon">
-                  <i className="fa-solid fa-clock"></i>
+
+              <div className="metric-card success">
+                <div className="metric-icon">
+                  <i className="fas fa-check-circle"></i>
                 </div>
-                <div className="alert-content">
-                  <h4>Review Needed</h4>
-                  <p>5 applications require senior review</p>
-                  <span className="alert-time">1 day ago</span>
+                <div className="metric-content">
+                  <div className="metric-value">{reportData.applications.approved}</div>
+                  <div className="metric-label">Approved</div>
+                  <div className="metric-trend positive">
+                    <i className="fas fa-percentage"></i>
+                    {reportData.applications.total > 0 ? 
+                      Math.round((reportData.applications.approved / reportData.applications.total) * 100) : 0
+                    }% of total ({reportData.performance.approvalRate}% rate)
+                  </div>
+                </div>
+              </div>
+
+              <div className="metric-card warning">
+                <div className="metric-icon">
+                  <i className="fas fa-clock"></i>
+                </div>
+                <div className="metric-content">
+                  <div className="metric-value">{reportData.applications.pending}</div>
+                  <div className="metric-label">Pending Review</div>
+                  <div className="metric-trend neutral">
+                    <i className="fas fa-percentage"></i>
+                    {reportData.applications.total > 0 ? 
+                      Math.round((reportData.applications.pending / reportData.applications.total) * 100) : 0
+                    }% of total ({reportData.performance.avgProcessingTime} days avg)
+                  </div>
+                </div>
+              </div>
+
+              <div className="metric-card danger">
+                <div className="metric-icon">
+                  <i className="fas fa-exclamation-triangle"></i>
+                </div>
+                <div className="metric-content">
+                  <div className="metric-value">{reportData.applications.rejected}</div>
+                  <div className="metric-label">Rejected</div>
+                  <div className="metric-trend negative">
+                    <i className="fas fa-percentage"></i>
+                    {reportData.applications.total > 0 ? 
+                      Math.round((reportData.applications.rejected / reportData.applications.total) * 100) : 0
+                    }% of total ({reportData.performance.rejectionRate}% rate)
+                  </div>
+                </div>
+              </div>
+
+              <div className="metric-card info">
+                <div className="metric-icon">
+                  <i className="fas fa-eye"></i>
+                </div>
+                <div className="metric-content">
+                  <div className="metric-value">{reportData.applications.inReview}</div>
+                  <div className="metric-label">In Review</div>
+                  <div className="metric-trend neutral">
+                    <i className="fas fa-percentage"></i>
+                    {reportData.applications.total > 0 ? 
+                      Math.round((reportData.applications.inReview / reportData.applications.total) * 100) : 0
+                    }% of total
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
     </Layout>
   )
 }

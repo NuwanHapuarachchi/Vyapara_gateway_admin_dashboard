@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 
-export default function Sidebar({ isOpen }) {
+export default function Sidebar({ isOpen, onToggle }) {
   const router = useRouter()
   const [activeSubmenu, setActiveSubmenu] = useState(null)
 
@@ -24,7 +24,6 @@ export default function Sidebar({ isOpen }) {
         { name: 'All Users', path: '/users/all' },
       ],
     },
-    { name: 'Reports', icon: 'fas fa-chart-line', path: '/reports' },
     { name: 'Settings', icon: 'fas fa-cog', path: '/settings' },
   ]
 
@@ -51,6 +50,11 @@ export default function Sidebar({ isOpen }) {
             </div>
           )}
         </div>
+        {onToggle && (
+          <button className="sidebar-toggle-btn" onClick={onToggle}>
+            <i className="fas fa-bars"></i>
+          </button>
+        )}
       </div>
 
       <nav className="sidebar-nav" aria-label="Primary">
