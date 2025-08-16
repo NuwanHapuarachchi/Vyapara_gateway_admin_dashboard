@@ -24,16 +24,7 @@ https://drive.google.com/drive/folders/17T8Ra5TD3oKF6kaWU_lR40P-jpwd4dlO?usp=dri
 4. **Access the application:**
    Open http://localhost:3000 in your browser
 
-## Exporting and Sharing the Docker Image
-
-### Export to TAR file
-```bash
-# Export the built image to a tar file
-docker save vyapara-admin > vyapara-admin.tar
-
-# Or with compression
-docker save vyapara-admin | gzip > vyapara-admin.tar.gz
-```
+## Docker Image
 
 ### Import on another machine
 ```bash
@@ -47,18 +38,6 @@ gunzip -c vyapara-admin.tar.gz | docker load
 docker run -p 3000:3000 vyapara-admin
 ```
 
-### Push to Docker Hub (Optional)
-```bash
-# Tag for Docker Hub
-docker tag vyapara-admin your-username/vyapara-admin:latest
-
-# Push to Docker Hub
-docker push your-username/vyapara-admin:latest
-
-# Others can pull and run
-docker pull your-username/vyapara-admin:latest
-docker run -p 3000:3000 your-username/vyapara-admin:latest
-```
 
 ### Running Locally (Development)
 
@@ -74,42 +53,6 @@ docker run -p 3000:3000 your-username/vyapara-admin:latest
    ```bash
    npm run dev
    ```
-
-## Required Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anonymous key |
-
-## Features
-
-- Application management dashboard
-- User verification pipeline
-- Document management
-- Audit logging
-- Real-time status updates
-- Secure messaging system
-
-## Tech Stack
-
-- **Framework:** Next.js 13
-- **Styling:** Tailwind CSS
-- **Backend:** Supabase
-- **Deployment:** Docker
-- **UI Components:** Lucide React icons
-
-## Project Structure
-
-```
-├── components/          # Reusable UI components
-├── pages/              # Next.js pages and API routes
-├── lib/                # Utility functions and services
-├── styles/             # Global styles
-├── public/             # Static assets
-└── Dockerfile          # Docker configuration
-```
-
 ## Troubleshooting
 
 ### Common Issues and Solutions
@@ -169,31 +112,4 @@ docker logs <container-id>         # View logs
 #### Node.js Version Warning
 ```
 Node.js 18 and below are deprecated and will no longer be supported
-```
-**Note:** This is a warning from Supabase. The application will still work, but consider upgrading to Node.js 20+ for future compatibility.
-
-#### Docker Build Takes Long Time
-**Reason:** First build includes downloading all dependencies and building the application.
-**Solution:** Subsequent builds will be faster due to Docker layer caching.
-
-### Quick Commands for Debugging
-
-```bash
-# Check running containers
-docker ps
-
-# Stop all containers
-docker stop $(docker ps -q)
-
-# Remove all stopped containers
-docker container prune
-
-# Check Docker images
-docker images
-
-# Remove unused images
-docker image prune
-
-# View detailed logs
-docker logs --follow <container-name>
 ```
