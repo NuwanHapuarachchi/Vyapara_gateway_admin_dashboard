@@ -55,8 +55,25 @@ export default function ApplicationSnapshot({ application }) {
         <div className="snapshot-section">
           <h4>Current Status</h4>
           <div className="status-info">
-            <span className="current-stage">{application.currentStage}</span>
-            <span className="assignee">Assigned to: {application.assignee}</span>
+            <div className="status-row">
+              <span className={`status-badge status-${(application.status || '').toLowerCase()}`}>
+                {application.status || 'Unknown'}
+              </span>
+              <span className="current-stage">{application.currentStage}</span>
+            </div>
+            <div className="status-details">
+              <span className="assignee">Assigned to: {application.assignee}</span>
+              {application.rejected_at && application.rejection_reason && (
+                <div className="rejection-info">
+                  <strong>Rejection Reason:</strong> {application.rejection_reason}
+                </div>
+              )}
+              {application.notes && (
+                <div className="admin-notes">
+                  <strong>Admin Notes:</strong> {application.notes}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

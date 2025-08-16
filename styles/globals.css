@@ -27,14 +27,23 @@
 
   /* Status Colors */
   --success-50: #f0fdf4;
+  --success-100: #dcfce7;
+  --success-200: #bbf7d0;
   --success-500: #22c55e;
   --success-600: #16a34a;
+  --success-700: #15803d;
   --warning-50: #fffbeb;
+  --warning-100: #fef3c7;
+  --warning-200: #fde68a;
   --warning-500: #f59e0b;
   --warning-600: #d97706;
+  --warning-700: #b45309;
   --danger-50: #fef2f2;
+  --danger-100: #fecaca;
+  --danger-200: #fca5a5;
   --danger-500: #ef4444;
   --danger-600: #dc2626;
+  --danger-700: #b91c1c;
 
   /* Spacing */
   --spacing-1: 0.25rem;
@@ -1749,9 +1758,18 @@ body {
 
 /* ===== APPLICATION DETAIL STYLES ===== */
 .application-detail-container {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
+  padding: 0 1.75rem;
 }
+
+@media (min-width: 1700px) {
+  .application-detail-container { max-width: 1840px; }
+}
+
+.application-detail-container h1 { font-size: 1.55rem; }
+.application-detail-container h3 { font-size: 1.05rem; }
+.application-detail-container .snapshot-card .info-grid .info-item label { font-size: .675rem; }
 
 .application-header {
   display: flex;
@@ -4204,6 +4222,282 @@ select {
     100% { transform: rotate(360deg); }
 }
 
+/* ===== DECISION PANEL STYLES ===== */
+.decision-panel {
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+}
+
+.decision-panel .panel-header {
+    padding: var(--spacing-6);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.decision-panel .panel-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.decision-buttons {
+    display: flex;
+    gap: var(--spacing-3);
+    padding: var(--spacing-6);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.decision-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3) var(--spacing-4);
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.decision-btn.approve {
+    border-color: var(--success-200);
+    color: var(--success-700);
+    background: var(--success-50);
+}
+
+.decision-btn.approve:hover {
+    background: var(--success-100);
+    border-color: var(--success-300);
+    box-shadow: var(--shadow-sm);
+}
+
+.decision-btn.reject {
+    border-color: var(--danger-200);
+    color: var(--danger-700);
+    background: var(--danger-50);
+}
+
+.decision-btn.reject:hover {
+    background: var(--danger-100);
+    border-color: var(--danger-300);
+    box-shadow: var(--shadow-sm);
+}
+
+.decision-btn.request-changes {
+    border-color: var(--warning-200);
+    color: var(--warning-700);
+    background: var(--warning-50);
+}
+
+.decision-btn.request-changes:hover {
+    background: var(--warning-100);
+    border-color: var(--warning-300);
+    box-shadow: var(--shadow-sm);
+}
+
+.decision-btn i {
+    font-size: 1rem;
+}
+
+.decision-btn:active {
+    transform: translateY(1px);
+}
+
+.decision-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.decision-checklist {
+    padding: var(--spacing-6);
+}
+
+.decision-checklist h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-4);
+}
+
+.checklist-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
+.checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+    cursor: pointer;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.checklist-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--success-500);
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.checklist-item span {
+    color: var(--gray-700);
+    user-select: none;
+}
+
+.checklist-item:hover span {
+    color: var(--gray-900);
+}
+
+.checklist-item input[type="checkbox"]:checked + span {
+    color: var(--success-700);
+    font-weight: 500;
+}
+
+.checklist-summary {
+    margin-top: var(--spacing-4);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--gray-200);
+}
+
+.checklist-note {
+    display: block;
+    color: var(--gray-500);
+    font-size: 0.8125rem;
+    margin-bottom: var(--spacing-2);
+}
+
+.checklist-progress {
+    font-size: 0.875rem;
+    color: var(--gray-700);
+    font-weight: 500;
+}
+
+.decision-summary {
+    text-align: center;
+    margin-bottom: var(--spacing-6);
+}
+
+.decision-summary ul {
+    text-align: left;
+    margin-top: var(--spacing-3);
+    padding-left: var(--spacing-4);
+}
+
+.decision-summary li {
+    margin-bottom: var(--spacing-1);
+    color: var(--gray-600);
+}
+
+.help-text {
+    display: block;
+    color: var(--gray-500);
+    font-size: 0.8125rem;
+    margin-top: var(--spacing-1);
+    line-height: 1.4;
+}
+
+/* Application Snapshot Status Styles */
+.status-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-2);
+}
+
+.status-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.rejection-info,
+.admin-notes {
+    padding: var(--spacing-2);
+    background: var(--gray-50);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.rejection-info {
+    border-left: 3px solid var(--danger-500);
+}
+
+.admin-notes {
+    border-left: 3px solid var(--warning-500);
+}
+
+.assignee {
+    color: var(--gray-600);
+    font-size: 0.875rem;
+}
+
+/* Decision Modal Specific Styles */
+.decision-modal {
+    max-width: 500px;
+}
+
+.decision-modal .modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.approval-content p {
+    color: var(--gray-700);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.rejection-content .form-group {
+    margin-bottom: var(--spacing-4);
+}
+
+.rejection-content .form-group:last-child {
+    margin-bottom: 0;
+}
+
+.rejection-content label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: var(--spacing-2);
+}
+
+.rejection-content select,
+.rejection-content textarea {
+    width: 100%;
+    padding: var(--spacing-3);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    color: var(--gray-900);
+    background: white;
+    transition: border-color 0.2s ease;
+}
+
+.rejection-content select:focus,
+.rejection-content textarea:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.rejection-content textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
 @media (max-width: 768px) {
     .metrics-grid {
     grid-template-columns: 1fr;
@@ -4230,5 +4524,13 @@ select {
     
     .header-actions > * {
     flex: 1;
+    }
+
+    .decision-buttons {
+        flex-direction: column;
+    }
+
+    .decision-btn {
+        width: 100%;
     }
 }

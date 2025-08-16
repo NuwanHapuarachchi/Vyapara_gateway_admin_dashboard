@@ -14,7 +14,7 @@ export default function Sidebar({ isOpen }) {
 
   const menuItems = [
     { name: 'Dashboard', icon: 'fas fa-chart-bar', path: '/dashboard' },
-    { name: 'Applications', icon: 'fas fa-file-alt', path: '/applications', badge: '24' },
+    { name: 'Applications', icon: 'fas fa-file-alt', path: '/applications' },
     {
       name: 'Users',
       icon: 'fas fa-users',
@@ -26,7 +26,6 @@ export default function Sidebar({ isOpen }) {
     },
     { name: 'Reports', icon: 'fas fa-chart-line', path: '/reports' },
     { name: 'Settings', icon: 'fas fa-cog', path: '/settings' },
-    { name: 'Help & Feedback', icon: 'fas fa-question-circle', path: '/help' },
   ]
 
   const handleLogout = () => {

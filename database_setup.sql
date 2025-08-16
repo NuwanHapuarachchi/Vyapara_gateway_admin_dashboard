@@ -1,36 +1,37 @@
--- SQL to create the vw_applications_list view in Supabase
--- Run this in your Supabase SQL editor
+-- Vyapara Gateway Admin Dashboard Database Documentation
+-- This file documents the existing database structure - DO NOT EXECUTE
+-- Database is already set up in production
 
-CREATE OR REPLACE VIEW vw_applications_list AS
-SELECT 
-    id,
-    applicant_name,
-    business_name,
-    business_type,
-    status,
-    submitted_at,
-    assignee_name,
-    EXTRACT(DAYS FROM (NOW() - submitted_at))::INTEGER as aging_days
-FROM applications
-ORDER BY submitted_at DESC;
+-- Example application data structure:
+-- {
+--   "id": "be197fd9-8968-4575-be8e-c76b0d6ce062",
+--   "business_id": "3efae37e-92df-4cd4-8281-ac3adf08a866", 
+--   "applicant_id": "f33c9ed4-2140-42cd-ae22-19c1c7522e04",
+--   "application_number": "VG202508000003",
+--   "status": "submitted",
+--   "current_step": "document_review",
+--   "total_steps": 5,
+--   "completed_steps": 5,
+--   "submitted_at": "2025-08-16 11:54:44.596892+00",
+--   "approved_at": null,
+--   "rejected_at": null,
+--   "rejection_reason": null,
+--   "estimated_completion_date": null,
+--   "notes": null,
+--   "created_at": "2025-08-16 06:24:44.822891+00",
+--   "updated_at": "2025-08-16 06:24:44.822891+00"
+-- }
 
--- If you don't have an applications table yet, here's a basic structure:
-/*
-CREATE TABLE IF NOT EXISTS applications (
-    id SERIAL PRIMARY KEY,
-    applicant_name VARCHAR(255) NOT NULL,
-    business_name VARCHAR(255) NOT NULL,
-    business_type VARCHAR(100),
-    status VARCHAR(50) DEFAULT 'pending',
-    submitted_at TIMESTAMP DEFAULT NOW(),
-    assignee_name VARCHAR(255),
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
-);
+-- Application Status Flow:
+-- draft -> submitted -> document_review -> approved/rejected
+-- 
+-- When reviewing documents:
+-- 1. Admin can approve: status -> 'approved', approved_at -> timestamp
+-- 2. Admin can reject: status -> 'rejected', rejected_at -> timestamp, rejection_reason -> text
+-- 3. Admin can request changes: status -> 'revision_required', notes -> feedback
 
--- Insert some sample data for testing
-INSERT INTO applications (applicant_name, business_name, business_type, status, assignee_name) VALUES
-('John Doe', 'ABC Corp', 'Technology', 'pending', 'Admin User'),
-('Jane Smith', 'XYZ Ltd', 'Retail', 'in-review', 'Manager'),
-('Bob Johnson', 'Quick Services', 'Services', 'approved', 'Admin User');
-*/
+-- Key Tables Used:
+-- - business_applications (main application data)
+-- - application_documents (uploaded documents)
+-- - businesses (business information)
+-- - user_profiles (applicant information)
