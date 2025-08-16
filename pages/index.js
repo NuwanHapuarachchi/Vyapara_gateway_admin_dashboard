@@ -9,13 +9,13 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  // If already signed in, go straight to dashboard
+  // If already signed in, go straight to applications
   useEffect(() => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession()
       if (data.session) {
         localStorage.setItem('auth', 'true') // keep your existing gate for now
-        router.replace('/dashboard')
+        router.replace('/applications')
       }
     }
     checkSession()
@@ -38,7 +38,7 @@ export default function Login() {
       } else if (data?.user) {
         // keep your existing dashboard guard (localStorage)
         localStorage.setItem('auth', 'true')
-        router.replace('/dashboard')
+        router.replace('/applications')
       } else {
         setError('Invalid credentials')
       }
