@@ -132,10 +132,6 @@ export default function AllUsers() {
               <i className="fas fa-download" />
               Export CSV
             </button>
-            <button className="btn btn-primary">
-              <i className="fas fa-user-plus" />
-              Invite User
-            </button>
           </div>
         </div>
 
