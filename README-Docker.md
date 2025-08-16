@@ -43,16 +43,7 @@ This repository contains a containerized Next.js admin dashboard for the Vyapara
      -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key \
      vyapara-admin
    ```
-
-## Environment Variables
-
-Required environment variables:
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL | `https://xxxxx.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anonymous key | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` |
-
+   
 ## Production Deployment
 
 ### For production deployment:
