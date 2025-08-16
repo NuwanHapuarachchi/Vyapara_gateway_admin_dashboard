@@ -1,154 +1,199 @@
-# Vyapara Admin Dashboard - Docker Deployment
+### Running with Docker
+## I have attached my compiler docker image here also. There was an error because of the public directory not existing, if any issues appear load the docker image if any issues appear email the team leader.
 
-This repository contains a containerized Next.js admin dashboard for the Vyapara Gateway system.
 
-## Quick Start with Docker
-
-### Prerequisites
-- Docker installed on your system
-- Docker Compose (usually comes with Docker Desktop)
-
-### Option 1: Using Docker Compose (Recommended)
-
-1. **Clone and navigate to the project:**
+1. **Clone the repository:**
    ```bash
-   cd path/to/vyapara_gateway/Ui_admin
+   git clone <repository-url>
+   cd Vyapara_gateway_admin_dashboard-main
    ```
 
 2. **Set up environment variables:**
-   ```bash
-   cp .env.example .env
-   # Edit .env file with your actual Supabase credentials
+   Create a `.env.local` file with your Supabase credentials:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
    ```
 
-3. **Build and run:**
+3. **Build and run the Docker container:**
    ```bash
-   docker-compose up --build
+   docker build -t vyapara-admin .
+   docker run -p 3000:3000 vyapara-admin
    ```
 
 4. **Access the application:**
    Open http://localhost:3000 in your browser
 
-### Option 2: Using Docker directly
+## Exporting and Sharing the Docker Image
 
-1. **Build the image:**
-   ```bash
-   docker build -t vyapara-admin .
-   ```
-
-2. **Run the container:**
-   ```bash
-   docker run -p 3000:3000 \
-     -e NEXT_PUBLIC_SUPABASE_URL=your_supabase_url \
-     -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key \
-     vyapara-admin
-   ```
-   
-## Production Deployment
-
-### For production deployment:
-
-1. **Build production image:**
-   ```bash
-   docker build -t vyapara-admin:production .
-   ```
-
-2. **Run with production settings:**
-   ```bash
-   docker run -d \
-     --name vyapara-admin \
-     --restart unless-stopped \
-     -p 3000:3000 \
-     -e NODE_ENV=production \
-     -e NEXT_PUBLIC_SUPABASE_URL=your_supabase_url \
-     -e NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key \
-     vyapara-admin:production
-   ```
-
-### Using Docker Compose for production:
-
+### Export to TAR file
 ```bash
-# Start in detached mode
-docker-compose up -d
+# Export the built image to a tar file
+docker save vyapara-admin > vyapara-admin.tar
 
-# View logs
-docker-compose logs -f
-
-# Stop the application
-docker-compose down
+# Or with compression
+docker save vyapara-admin | gzip > vyapara-admin.tar.gz
 ```
 
-## Docker Commands Reference
-
+### Import on another machine
 ```bash
-# Build the image
-docker build -t vyapara-admin .
+# Load the image from tar file
+docker load < vyapara-admin.tar
 
-# Run container
+# Or from compressed file
+gunzip -c vyapara-admin.tar.gz | docker load
+
+# Then run the imported image
 docker run -p 3000:3000 vyapara-admin
-
-# Run in background
-docker run -d -p 3000:3000 vyapara-admin
-
-# Stop container
-docker stop <container_id>
-
-# Remove container
-docker rm <container_id>
-
-# Remove image
-docker rmi vyapara-admin
-
-# View running containers
-docker ps
-
-# View logs
-docker logs <container_id>
 ```
 
-## Sharing the Application
+### Push to Docker Hub (Optional)
+```bash
+# Tag for Docker Hub
+docker tag vyapara-admin your-username/vyapara-admin:latest
 
-To share this application with others:
+# Push to Docker Hub
+docker push your-username/vyapara-admin:latest
 
-1. **Share the entire project folder** containing:
-   - Dockerfile
-   - docker-compose.yml
-   - .env.example
-   - All source code
+# Others can pull and run
+docker pull your-username/vyapara-admin:latest
+docker run -p 3000:3000 your-username/vyapara-admin:latest
+```
 
-2. **Or build and share the Docker image:**
+### Running Locally (Development)
+
+1. **Install dependencies:**
    ```bash
-   # Build and tag
-   docker build -t vyapara-admin:latest .
-   
-   # Save to tar file
-   docker save vyapara-admin:latest > vyapara-admin.tar
-   
-   # Load on another machine
-   docker load < vyapara-admin.tar
+   npm install
    ```
 
-3. **Or push to a Docker registry:**
+2. **Set up environment variables:**
+   Create a `.env.local` file as described above.
+
+3. **Run the development server:**
    ```bash
-   # Tag for registry
-   docker tag vyapara-admin:latest your-registry/vyapara-admin:latest
-   
-   # Push to registry
-   docker push your-registry/vyapara-admin:latest
+   npm run dev
    ```
 
-## Troubleshooting
+## Required Environment Variables
 
-- **Port already in use:** Change the port mapping: `-p 3001:3000`
-- **Environment variables not working:** Ensure your .env file is properly formatted
-- **Build fails:** Check that all dependencies in package.json are correct
-- **Application won't start:** Check logs with `docker logs <container_id>`
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anonymous key |
 
 ## Features
 
-- ✅ Multi-stage Docker build for optimized image size
-- ✅ Non-root user for security
-- ✅ Health checks included
-- ✅ Production-ready configuration
-- ✅ Environment variable support
-- ✅ Docker Compose for easy deployment
+- Application management dashboard
+- User verification pipeline
+- Document management
+- Audit logging
+- Real-time status updates
+- Secure messaging system
+
+## Tech Stack
+
+- **Framework:** Next.js 13
+- **Styling:** Tailwind CSS
+- **Backend:** Supabase
+- **Deployment:** Docker
+- **UI Components:** Lucide React icons
+
+## Project Structure
+
+```
+├── components/          # Reusable UI components
+├── pages/              # Next.js pages and API routes
+├── lib/                # Utility functions and services
+├── styles/             # Global styles
+├── public/             # Static assets
+└── Dockerfile          # Docker configuration
+```
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### 1. **Build Error: Missing Supabase Environment Variables**
+```
+Error: Missing Supabase environment variables. Please check your .env.local file.
+```
+**Solution:** Ensure environment variables are set in the Dockerfile for the build stage:
+```dockerfile
+# In Dockerfile, add these lines before RUN npm run build
+ENV NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
+```
+
+#### 2. **Build Error: Missing Public Directory**
+```
+ERROR: failed to solve: "/app/public": not found
+```
+**Solution:** Create the missing `public` directory:
+```bash
+mkdir public
+echo "# Public Assets" > public/README.md
+```
+
+#### 3. **TypeScript Dependencies Missing**
+```
+It looks like you're trying to use TypeScript but do not have the required package(s) installed.
+```
+**Solution:** The build process will automatically install TypeScript dependencies. This is normal during the first build.
+
+#### 4. **Port Already in Use**
+```
+Error: listen EADDRINUSE: address already in use :::3000
+```
+**Solution:** Use a different port:
+```bash
+docker run -p 3001:3000 vyapara-admin
+```
+
+#### 5. **Docker Image Not Found After Export/Import**
+**Solution:** Always specify the tag when loading:
+```bash
+docker load -i vyapara-admin.tar
+docker run -p 3000:3000 vyapara-admin:latest
+```
+
+#### 6. **Application Won't Start**
+**Solution:** Check the container logs:
+```bash
+docker ps                          # Get container ID
+docker logs <container-id>         # View logs
+```
+
+### Development Issues
+
+#### Node.js Version Warning
+```
+Node.js 18 and below are deprecated and will no longer be supported
+```
+**Note:** This is a warning from Supabase. The application will still work, but consider upgrading to Node.js 20+ for future compatibility.
+
+#### Docker Build Takes Long Time
+**Reason:** First build includes downloading all dependencies and building the application.
+**Solution:** Subsequent builds will be faster due to Docker layer caching.
+
+### Quick Commands for Debugging
+
+```bash
+# Check running containers
+docker ps
+
+# Stop all containers
+docker stop $(docker ps -q)
+
+# Remove all stopped containers
+docker container prune
+
+# Check Docker images
+docker images
+
+# Remove unused images
+docker image prune
+
+# View detailed logs
+docker logs --follow <container-name>
+```
